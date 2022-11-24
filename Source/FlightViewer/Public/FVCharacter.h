@@ -59,10 +59,15 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon")
 	TSubclassOf<AFVProjectile> ProjectileClass;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "UI")
+	TSubclassOf<UUserWidget> GUIWidgetClass;
+
+
 public:	
 	virtual void Tick(float DeltaTime) override;
-
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+	FVector GetCurrentCoordinates() const;
+
 private:
 
 	std::ifstream in_stream;
@@ -73,6 +78,7 @@ private:
 	ViewerMode CurrentViewerMode;
 	AFVProjectile* Projectile;
 	bool IsCoordinatesLoaded;
+	UUserWidget* GUIWidget;
 
 	void OnStart();
 	void OnLoad();

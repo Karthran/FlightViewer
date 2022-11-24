@@ -2,6 +2,7 @@
 #include "FVCharacter.h"
 #include "FVProjectile.h"
 #include "Camera/CameraComponent.h"
+#include "Blueprint/UserWidget.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogFVCharacter, All, All)
 
@@ -16,6 +17,7 @@ AFVCharacter::AFVCharacter()
 	//LauncherMesh->SetupAttachment(GetRootComponent());
 
 	IsCoordinatesLoaded = false;
+	GUIWidget = nullptr;
 }
 
 FVector AFVCharacter::GetNextCoord()
@@ -73,6 +75,10 @@ void AFVCharacter::BeginPlay()
 	CurrentCamera = CameraPosition::BACK;
 	CurrentActor = CameraOwner::LAUNCHER;
 	CurrentViewerMode = ViewerMode::PAUSE;
+
+	check(GUIWidgetClass);
+	GUIWidget = CreateWidget<UUserWidget>(GetWorld(), GUIWidgetClass);
+	GUIWidget->AddToViewport();
 }
 
 void AFVCharacter::Tick(float DeltaTime)
@@ -106,6 +112,12 @@ void AFVCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 
 }
 
+FVector AFVCharacter::GetCurrentCoordinates() const
+{
+	if (!IsCoordinatesLoaded || CurrentCoordinatesIndex >= Coordinates.Num() || CurrentCoordinatesIndex < 0) return FVector();
+	return Coordinates[CurrentCoordinatesIndex];
+}
+
 void AFVCharacter::OnStart()
 {
 	if (!IsCoordinatesLoaded) return;
@@ -114,11 +126,12 @@ void AFVCharacter::OnStart()
 	Location.X += 50.0f;
 	Location.Z += 10.0f;
 
+	FRotator NewRotator = (Coordinates[1] - Coordinates[0]).Rotation();
 	FRotator Rotator = GetRootComponent()->GetComponentRotation();
 
 	UE_LOG(LogFVCharacter, Warning, TEXT("Current Direction: %f %f %f"), Location.X, Location.Y, Location.Z)
 
-	const FTransform SpawnTransform(Rotator, Location);
+	const FTransform SpawnTransform(NewRotator, Location);
 
 	Projectile = GetWorld()->SpawnActorDeferred<AFVProjectile>(ProjectileClass, SpawnTransform);
 	if (!Projectile)
