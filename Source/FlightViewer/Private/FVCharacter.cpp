@@ -126,12 +126,11 @@ void AFVCharacter::OnStart()
 	Location.X += 50.0f;
 	Location.Z += 10.0f;
 
-	FRotator NewRotator = (Coordinates[1] - Coordinates[0]).Rotation();
-	FRotator Rotator = GetRootComponent()->GetComponentRotation();
+	FRotator Rotator = (Coordinates[1] - Coordinates[0]).Rotation();
 
 	UE_LOG(LogFVCharacter, Warning, TEXT("Current Direction: %f %f %f"), Location.X, Location.Y, Location.Z)
 
-	const FTransform SpawnTransform(NewRotator, Location);
+	const FTransform SpawnTransform(Rotator, Location);
 
 	Projectile = GetWorld()->SpawnActorDeferred<AFVProjectile>(ProjectileClass, SpawnTransform);
 	if (!Projectile)
