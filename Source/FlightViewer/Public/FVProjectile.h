@@ -10,6 +10,7 @@
 
 class USphereComponent;
 class UCameraComponent;
+class UNiagaraSystem;
 
 UCLASS()
 class FLIGHTVIEWER_API AFVProjectile : public AActor
@@ -31,13 +32,19 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components");
 	UCameraComponent* CameraComponent;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "VFX")
+	UNiagaraSystem* Effect;
 
 public:	
 	virtual void Tick(float DeltaTime) override;
 
 private:
 	CameraPosition CurrentCamera;
+	FVector PreviousCoordinates;
+	bool IsImpact;
 
 	UFUNCTION()
 	void OnViewChanged();
+
+	void PlayImpactFX(const FVector& Location,const FVector& Normal);
 };

@@ -3,6 +3,7 @@
 #include "FVProjectile.h"
 #include "Components/SphereComponent.h"
 #include "Camera/CameraComponent.h"
+#include "NiagaraFunctionLibrary.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogAFVProjectile, All, All)
 
@@ -30,15 +31,39 @@ void AFVProjectile::BeginPlay()
 	CurrentCamera = CameraPosition::HEAD;
 
 	Cast<AFVCharacter>(GetOwner())->OnProjectileViewChange.AddDynamic(this, &AFVProjectile::OnViewChanged);
+
+	IsImpact = false;
+	PreviousCoordinates = FVector(-1000000.0f);
 }
 
 void AFVProjectile::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+	FVector Coordinates;
+	if (!IsImpact)
+	{
+		Coordinates = Cast<AFVCharacter>(GetOwner())->GetNextCoord();
 
-	FVector Coordinates = Cast<AFVCharacter>(GetOwner())->GetNextCoord();
+		if (Coordinates.X < PreviousCoordinates.X)
+		{
+			IsImpact = true;
+		}
+		else PreviousCoordinates = Coordinates;
+	}
+	else
+	{
+		IsImpact = false;
+	}
 
-	SetActorLocation(Coordinates);
+	if (!IsImpact)
+	{
+		SetActorLocation(Coordinates);
+	}
+	else
+	{
+		PlayImpactFX(Coordinates, FVector(-1.0f, 0.0f, 0.0f));
+	}
+
 }
 
 void AFVProjectile::OnViewChanged()
@@ -57,5 +82,11 @@ void AFVProjectile::OnViewChanged()
 		break;
 	}
 	UE_LOG(LogAFVProjectile, Error, TEXT("Now changed view"))
+}
+
+void AFVProjectile::PlayImpactFX(const FVector& Location, const FVector& Normal)
+{
+	check(Effect);
+	UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), Effect, Location, Normal.Rotation());
 }
 

@@ -38,7 +38,7 @@ FVector AFVCharacter::GetNextCoord()
 		break;
 	case ViewerMode::PAUSE:
 		UE_LOG(LogFVCharacter, Error, TEXT("CurrentCoordinatesIndex: %d"), CurrentCoordinatesIndex)
-		Result = Coordinates[CurrentCoordinatesIndex];
+			Result = Coordinates[CurrentCoordinatesIndex];
 		break;
 	case ViewerMode::NEXT:
 		if (CurrentCoordinatesIndex < Coordinates.Num() - 1)
@@ -109,7 +109,6 @@ void AFVCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 	PlayerInputComponent->BindAction<FFileLoadSignature>("600m", IE_Pressed, this, &AFVCharacter::OpenFile, 600);
 	PlayerInputComponent->BindAction<FFileLoadSignature>("700m", IE_Pressed, this, &AFVCharacter::OpenFile, 700);
 	PlayerInputComponent->BindAction<FFileLoadSignature>("800m", IE_Pressed, this, &AFVCharacter::OpenFile, 800);
-
 }
 
 FVector AFVCharacter::GetCurrentCoordinates() const
@@ -126,11 +125,11 @@ void AFVCharacter::OnStart()
 	Location.X += 50.0f;
 	Location.Z += 10.0f;
 
-	FRotator Rotator = (Coordinates[1] - Coordinates[0]).Rotation();
-
+	//FRotator Rotator = (Coordinates[1] - Coordinates[0]).Rotation();
+	FRotator Rotator = GetRootComponent()->GetComponentRotation();
 	UE_LOG(LogFVCharacter, Warning, TEXT("Current Direction: %f %f %f"), Location.X, Location.Y, Location.Z)
 
-	const FTransform SpawnTransform(Rotator, Location);
+		const FTransform SpawnTransform(Rotator, Location);
 
 	Projectile = GetWorld()->SpawnActorDeferred<AFVProjectile>(ProjectileClass, SpawnTransform);
 	if (!Projectile)
@@ -231,7 +230,7 @@ void AFVCharacter::OpenFile(int Range)
 	}
 
 	CurrentCoordinatesIndex = 0;
-	
+
 	IsCoordinatesLoaded = true;
 }
 
