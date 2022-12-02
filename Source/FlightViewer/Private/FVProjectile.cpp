@@ -31,6 +31,7 @@ void AFVProjectile::BeginPlay()
 	CurrentCamera = CameraPosition::HEAD;
 
 	Cast<AFVCharacter>(GetOwner())->OnProjectileViewChange.AddDynamic(this, &AFVProjectile::OnViewChanged);
+	CollisionComponent->OnComponentHit.AddDynamic(this, &AFVProjectile::OnProjectileHit);
 
 	IsImpact = false;
 	PreviousCoordinates = FVector(-1000000.0f);
@@ -39,30 +40,35 @@ void AFVProjectile::BeginPlay()
 void AFVProjectile::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	FVector Coordinates;
-	if (!IsImpact)
-	{
-		Coordinates = Cast<AFVCharacter>(GetOwner())->GetNextCoord();
 
-		if (Coordinates.X < PreviousCoordinates.X)
-		{
-			IsImpact = true;
-		}
-		else PreviousCoordinates = Coordinates;
-	}
-	else
-	{
-		IsImpact = false;
-	}
+	FVector Coordinates = Cast<AFVCharacter>(GetOwner())->GetNextCoord();
 
-	if (!IsImpact)
-	{
-		SetActorLocation(Coordinates);
-	}
-	else
-	{
-		PlayImpactFX(Coordinates, FVector(-1.0f, 0.0f, 0.0f));
-	}
+	SetActorLocation(Coordinates);
+
+	//FVector Coordinates;
+	//if (!IsImpact)
+	//{
+	//	Coordinates = Cast<AFVCharacter>(GetOwner())->GetNextCoord();
+
+	//	if (Coordinates.X < PreviousCoordinates.X)
+	//	{
+	//		IsImpact = true;
+	//	}
+	//	else PreviousCoordinates = Coordinates;
+	//}
+	//else
+	//{
+	//	IsImpact = false;
+	//}
+
+	//if (!IsImpact)
+	//{
+	//	SetActorLocation(Coordinates);
+	//}
+	//else
+	//{
+	//	PlayImpactFX(Coordinates, FVector(-1.0f, 0.0f, 0.0f));
+	//}
 
 }
 
@@ -84,9 +90,9 @@ void AFVProjectile::OnViewChanged()
 	UE_LOG(LogAFVProjectile, Error, TEXT("Now changed view"))
 }
 
-void AFVProjectile::PlayImpactFX(const FVector& Location, const FVector& Normal)
+void AFVProjectile::OnProjectileHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
 	check(Effect);
-	UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), Effect, Location, Normal.Rotation());
+	UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), Effect, Hit.ImpactPoint, Hit.ImpactNormal.Rotation());
 }
 
