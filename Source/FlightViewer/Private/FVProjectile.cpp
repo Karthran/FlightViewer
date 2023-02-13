@@ -31,7 +31,7 @@ void AFVProjectile::BeginPlay()
 	CurrentCamera = CameraPosition::HEAD;
 
 	Cast<AFVCharacter>(GetOwner())->OnProjectileViewChange.AddDynamic(this, &AFVProjectile::OnViewChanged);
-	CollisionComponent->OnComponentHit.AddDynamic(this, &AFVProjectile::OnProjectileHit);
+//	CollisionComponent->OnComponentHit.AddDynamic(this, &AFVProjectile::OnProjectileHit);
 
 	IsImpact = false;
 	PreviousCoordinates = FVector(-1000000.0f);
