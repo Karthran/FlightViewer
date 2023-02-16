@@ -10,6 +10,7 @@
 
 class UCameraComponent;
 class AFVProjectile;
+class ATcpNetActor;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnProjectileViewChange);
 
@@ -32,6 +33,7 @@ enum class ViewerMode : uint8 {
 	PAUSE = 1 UMETA(DisplayName = "PAUSE"),
 	NEXT = 2 UMETA(DisplayName = "NEXT"),
 	PREVIOUS = 3 UMETA(DisplayName = "PREVIOUS"),
+	STOP = 4 UMETA(DisplayName = "STOP")
 };
 
 
@@ -62,6 +64,10 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "UI")
 	TSubclassOf<UUserWidget> GUIWidgetClass;
 
+	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon")
+	//ATcpNetActor* TcpSocketActor;
+
+	void OnFindTcpActor();
 
 public:	
 	virtual void Tick(float DeltaTime) override;
@@ -79,6 +85,7 @@ private:
 	AFVProjectile* Projectile;
 	bool IsCoordinatesLoaded;
 	UUserWidget* GUIWidget;
+	FVector LastCoordinates;
 
 	void OnStart();
 	void OnLoad();
@@ -93,4 +100,10 @@ private:
 	void OnViewerPrevious();
 
 	void OpenFile(int Range);
+
+	UFUNCTION()
+		void OnMessageReceived(FString Message);
+
+	void ParseAndSave(FString& Message);
+
 };

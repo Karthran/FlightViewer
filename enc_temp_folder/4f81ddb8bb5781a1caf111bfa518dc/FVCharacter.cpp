@@ -149,12 +149,7 @@ FVector AFVCharacter::GetCurrentCoordinates() const
 void AFVCharacter::OnStart()
 {
 	if (!IsCoordinatesLoaded) return;
-	if (Projectile)
-	{
-		CurrentCoordinatesIndex = 0;
-		CurrentViewerMode = ViewerMode::PAUSE;
-		return;
-	}
+	if (Projectile) return;
 
 	//FVector Location = GetMesh()->GetComponentLocation();
 	//Location.X += 50.0f;
