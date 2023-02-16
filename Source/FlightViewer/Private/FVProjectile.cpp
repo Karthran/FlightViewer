@@ -45,6 +45,8 @@ void AFVProjectile::Tick(float DeltaTime)
 
 	SetActorLocation(Coordinates);
 
+	UE_LOG(LogAFVProjectile, Error, TEXT("Projectile DeltaTime: %f"), DeltaTime)
+
 	//FVector Coordinates;
 	//if (!IsImpact)
 	//{

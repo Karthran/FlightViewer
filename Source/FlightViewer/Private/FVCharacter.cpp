@@ -20,6 +20,7 @@ AFVCharacter::AFVCharacter()
 
 	IsCoordinatesLoaded = false;
 	GUIWidget = nullptr;
+	PreviousCoordinatesNumber = 0;
 }
 
 FVector AFVCharacter::GetNextCoord()
@@ -30,21 +31,40 @@ FVector AFVCharacter::GetNextCoord()
 	case ViewerMode::PLAY:
 		if (CurrentCoordinatesIndex < Coordinates.Num())
 		{
-			Result = Coordinates[CurrentCoordinatesIndex++];
+			switch (CurrentDataSource)
+			{
+			case DataSource::FILE :
+				Result = Coordinates[CurrentCoordinatesIndex++];
+				break;
+			case DataSource::ETHERNET :
+				if (PreviousCoordinatesNumber == Coordinates.Num())
+				{
+					Result = Coordinates[CurrentCoordinatesIndex++];
+				}
+				else
+				{
+					CurrentCoordinatesIndex = Coordinates.Num() - 1;
+					Result = Coordinates[CurrentCoordinatesIndex];
+					PreviousCoordinatesNumber = Coordinates.Num();
+				}
+				break;
+			default:
+				break;
+			}
 		}
 		else
 		{
 			// Пауза в последней точке
 			CurrentViewerMode = ViewerMode::PAUSE;
 			Result = Coordinates[--CurrentCoordinatesIndex];
-			//
+
 			//Циклическое воспроизведение 
 			//CurrentCoordinatesIndex = 0;
 			//Result = Coordinates[0];
 		}
 		break;
 	case ViewerMode::PAUSE:
-		UE_LOG(LogFVCharacter, Error, TEXT("CurrentCoordinatesIndex: %d"), CurrentCoordinatesIndex)
+//		UE_LOG(LogFVCharacter, Error, TEXT("CurrentCoordinatesIndex: %d"), CurrentCoordinatesIndex)
 			Result = Coordinates[CurrentCoordinatesIndex];
 		break;
 	case ViewerMode::NEXT:
@@ -113,7 +133,8 @@ void AFVCharacter::OnFindTcpActor()
 void AFVCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
+	CurrentDeltaTime = DeltaTime;
+	UE_LOG(LogFVCharacter, Error, TEXT("Character DeltaTime: %f"), DeltaTime)
 }
 
 void AFVCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -276,8 +297,8 @@ void AFVCharacter::OpenFile(int Range)
 	}
 
 	CurrentCoordinatesIndex = 0;
-
 	IsCoordinatesLoaded = true;
+	CurrentDataSource = DataSource::FILE;
 }
 
 void AFVCharacter::OnMessageReceived(FString Message)
@@ -320,6 +341,7 @@ void AFVCharacter::ParseAndSave(FString& Message)
 		IsCoordinatesLoaded = true;
 		OnStart();
 		CurrentViewerMode = ViewerMode::PLAY;
+		CurrentDataSource = DataSource::ETHERNET;
 		CurrentCoordinatesIndex = 0;
 	}
 }

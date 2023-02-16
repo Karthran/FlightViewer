@@ -12,6 +12,8 @@ class UCameraComponent;
 class AFVProjectile;
 class ATcpNetActor;
 
+constexpr float DescritizationTime = 0.01f;
+
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnProjectileViewChange);
 
 UENUM(BlueprintType)
@@ -36,6 +38,11 @@ enum class ViewerMode : uint8 {
 	STOP = 4 UMETA(DisplayName = "STOP")
 };
 
+UENUM(BlueprintType)
+enum class DataSource : uint8 {
+	FILE = 0 UMETA(DisplayName = "FILE"),
+	ETHERNET = 1 UMETA(DisplayName = "ETHERNET")
+};
 
 UCLASS()
 class FLIGHTVIEWER_API AFVCharacter : public ACharacter
@@ -86,6 +93,9 @@ private:
 	bool IsCoordinatesLoaded;
 	UUserWidget* GUIWidget;
 	FVector LastCoordinates;
+	DataSource CurrentDataSource;
+	size_t PreviousCoordinatesNumber;
+	float CurrentDeltaTime;
 
 	void OnStart();
 	void OnLoad();
